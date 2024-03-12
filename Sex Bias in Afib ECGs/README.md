@@ -94,11 +94,6 @@ TN - True negatives, model predicted negative and true value is negative (count)
 FP - False positives, model predicted positive but true value is negative (count)
 FN - False negatives, model predicted negative but true value is positive (count)
 
-Overall accuracy - Equal accuracy (correct predictions) for each subgroup (TP + TN) / (total count)
-Statistical Parity - Fractions of assigned positive labels are the same in subgroups, or align with known percentage distributions (TP + FP) / (total count)
-Equal Opportunity - True positive rates are equal for subgroups TP / (TP + FN)
-Predictive Equality -  False positive rates are equal for subgroups FP / (FP + TN)
-False Negative Rate - False negative rates are equal for subgroups FN / (FN + TP)
 
 ### Overall Accuracy 
 
@@ -106,7 +101,7 @@ False Negative Rate - False negative rates are equal for subgroups FN / (FN + TP
 
 **Equation:** (TP + TN) / (total count)
 
-**How to interpret:**  
+**How to interpret:**  The higher the percentage (closer to 1) the better the model is at predicting the correct true value.
 
 ### Statistical Parity
 
@@ -114,7 +109,7 @@ False Negative Rate - False negative rates are equal for subgroups FN / (FN + TP
 
 **Equation:** (TP + FP) / (total count)
 
-**How to interpret:**  
+**How to interpret:**  A higher percentage (closer to 1) means that the model often predicts positive values, and a low percentage (closer to 0) means that the model often predicts negative values.
 
 ### Equal Opportunity
 
@@ -122,15 +117,15 @@ False Negative Rate - False negative rates are equal for subgroups FN / (FN + TP
 
 **Equation:** TP / (TP + FN)
 
-**How to interpret:**  
+**How to interpret:**  A high percentage (closer to 1) means that the model is very good at accurately predictive positive values.
 
 ### Predictive Equality
 
-**Definition:**  Percentage of the negative outcomes that the model predicted correctly
+**Definition:**  Percentage of the negative outcomes that the model predicted incorrectly
 
 **Equation:** FP / (FP + TN)
 
-**How to interpret:**  
+**How to interpret:**  A high percentage (closer to 1), means that the model often misses negative predictions.
 
 ### False Negative Rate
 
@@ -138,9 +133,45 @@ False Negative Rate - False negative rates are equal for subgroups FN / (FN + TP
 
 **Equation:** FN / (FN + TP)
 
-**How to interpret:**  
+**How to interpret:**  A high percentage (closer to 1), means that the model often misses positive predictions.
 
+### Disparate Impact 
 
+**Definition:**  The ratio of positive proportions in the predicted labels metric for males versus females
 
-#### Updates to be made
-The above metrics need to be updated and added to in order to analyze these metrics throught the lens of sex. To do this, we can measure each metric for males and females separately, and then subtract the two values from each other. Therefore, if the metric is 0, it is the same for both sexes, if it trends toward 1 or toward -1, it is biased toward one sex.
+**Equation:** (males given a positive prediction / number of males) / (females given a positive prediction / number of females)
+
+**How to interpret:** A value of 1 means there is demographic partiy, that is the model predicts positive outcomes for males and females at the same rate. A value less than 1 means that males have a higher proportion of positive predictions than women, and vice versa for a value greater than 1.
+
+### Accuracy Difference 
+
+**Definition:**  The model accuracy for males minus the model acuracy for females
+
+**Equation:** ((male true positives + male true negatives) / (total males)) - ((female true positives + female true negatives) / (total females))
+
+**How to interpret:** A value of 0 means that the accuracy of the model for males and females is the same. A positive value means the model is more accurate for males than for females. A negative value means the model is more accurate for females than for males.
+
+### Difference in Conditional Acceptance 
+
+**Definition:**  This compares the true values to the model's predicted values and whether this is the same for males and females for predicted positive values
+
+**Equation:** (male true positives / male predicted positives) - (female true positives / female predicted positives)
+
+**How to interpret:** A value of 0 means the ratio of true positives to predicted positives is the same for both males and females. A positive value means this ratio is greater for males than females, which indicates a potential bias against males who should have a positive prediction. A negative value means this ratio is greater for females than males, which indicates a potential bias against females who should have a positive prediction.
+
+### Difference in Conditional Rejection
+
+**Definition:**  This compares the true values to the model's predicted values and whether this is the same for males and females for predicted negative values
+
+**Equation:** (male true negatives / male predicted negatives) - (female true negatives / female predicted negatives)
+
+**How to interpret:** A value of 0 means the ratio of true negatives to predicted negatives is the same for both males and females. A positive value means this ratio is greater for males than females, which indicates a potential bias against males who should have a negative prediction. A negative value means this ratio is greater for females than males, which indicates a potential bias against females who should have a negative prediction.
+
+### Treatment Equality
+
+**Definition:**  The difference in the ratio of false negatives to false positives between males and females
+
+**Equation:** (false negatives for females / false positives for females) - (false negatives for males / false positives for males)
+
+**How to interpret:** A value of 0 means the ratios of false negatives to false positives is the same for both males and females. A positive value means that the model predicts more false negatives than false positives for females compared to males, and vice versa for a negative value. 
+
