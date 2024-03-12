@@ -28,7 +28,6 @@ if (params.help) {
 	    Specifications for outputs:
                 --validation_result     The output directory where the results from validation step will be saved
                 --assessment_results    The output directory where the results from the computed metrics step will be saved
-                --consolidation_result	The output directory where the conoslidation file will be saved
 				--outdir                The output directory where the final results will be saved (graphs and such)
                 --statsdir              The output directory with nextflow statistics
                 --otherdir              The output directory where custom results will be saved (no directory inside)
@@ -52,7 +51,6 @@ if (params.help) {
          other participant results directory: ${params.aggreg_dir}
          validation results directory: ${params.validation_result}
          metrics results directory: ${params.assessment_results}
-         consolidation results directory: ${params.consolidation_result}
          overall results directory: ${params.outdir}
          statistics results about nextflow run: ${params.statsdir}
          directory with community-specific results: ${params.otherdir}
