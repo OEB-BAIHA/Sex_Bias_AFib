@@ -25,7 +25,7 @@ if (params.help) {
 
 	    Specifications for outputs:
                 --validation_result     The output directory where the results from validation step will be saved
-                --assessment_result     The output directory where the results from the computed metrics step will be saved
+                --assessment_results    The output directory where the results from the computed metrics step will be saved
                 --consolidation_result	The output directory where the conoslidation file will be saved
 				--outdir                The output directory where the final results will be saved (graphs and such)
                 --statsdir              The output directory with nextflow statistics
@@ -50,7 +50,7 @@ if (params.help) {
          participant id: ${params.participant_id}
          other participant results directory: ${params.aggreg_dir}
          validation results directory: ${params.validation_result}
-         metrics results directory: ${params.assessment_result}
+         metrics results directory: ${params.assessment_results}
          consolidation results directory: ${params.consolidation_result}
          overall results directory: ${params.outdir}
          statistics results about nextflow run: ${params.statsdir}
@@ -70,7 +70,7 @@ gold_standard = file(params.goldstandard_dir)
 
 // Output
 validation_dir = file(params.validation_result, type: 'dir')
-assessment_dir = file(params.assessment_result, type: 'dir')
+assessment_dir = file(params.assessment_results, type: 'dir')
 consolidation_dir = file(params.consolidation_result, type: 'dir')
 results_dir = file(params.outdir, type: 'dir')
 stats_dir = file(params.statsdir, type: 'dir')
