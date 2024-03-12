@@ -72,7 +72,7 @@ benchmark_data = Channel.fromPath(params.aggreg_dir, type: 'dir' )
 // Output
 validation_dir = file(params.validation_result, type: 'dir')
 assessment_dir = file(params.assessment_results, type: 'dir')
-consolidation_dir = file(params.consolidation_result, type: 'dir')
+//consolidation_dir = file(params.consolidation_result, type: 'dir')
 results_dir = file(params.outdir, type: 'dir')
 stats_dir = file(params.statsdir, type: 'dir')
 //other_dir = file(params.otherdir, type: 'dir')
@@ -162,7 +162,7 @@ process consolidation {
 	val validations
 	val challenge_id
 	val offline
-	path consolidation_dir
+	//path consolidation_dir
 	
 	output:
 	path results_dir
@@ -182,7 +182,8 @@ workflow {
 	validations = validation.out.vf.collect()
 	compute_metrics(validation.out.validation_status, input_file, tool_name, community_id, challenge_id, assessment_filename)
 	assessments = compute_metrics.out.af.collect()
-    consolidation(benchmark_data, assessments, validations, challenge_id, 1, consolidation_dir)
+    //consolidation(benchmark_data, assessments, validations, challenge_id, 1, consolidation_dir)
+	consolidation(benchmark_data, assessments, validations, challenge_id, 1)
 }
 
 workflow.onComplete { 
