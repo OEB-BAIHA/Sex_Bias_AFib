@@ -18,7 +18,7 @@
 # From golden dataset...
 # - column labeled 'true_value' that has '1' for atrial fibrillation and '0' for no atrial fibrillation
 
-# Test locally: python3 model_output_test.py -i ../input_data/Nuubo_output.csv -p Nuubo -com BAIHA -c model-output -m ../golden_dataset/key.csv -o ../metrics_output/Nuubo_assessment.json
+# Test locally: python3 model_output_test.py -i ../../input_data/Nuubo_output.csv -p Nuubo -com BAIHA -c model-output -m ../../gold_standard/key.csv -o ../metrics_output/Nuubo_assessment.json
 
 import numpy as np
 import os
@@ -59,7 +59,7 @@ def compute_metrics(input_model_output,  gold_standard, challenges, participant_
 
     # Load true values 
     df_golden = pd.read_csv(gold_standard, sep=',', comment="#", header=0)
-    df_golden = df_golden[['ID', 'true_value']]
+    df_golden = df_golden[['ID', 'Sexo', 'true_value']]
 
     # Join model output and true values 
     # The resulting df will contain only the common key values between the two datasets, will drop ids that are in one but not the other
@@ -82,10 +82,47 @@ def compute_metrics(input_model_output,  gold_standard, challenges, participant_
     predictive_equality = FP / (FP + TN)
     false_negative_rate = FN / (FN + TP)
 
+    # Calcuate the sex-specific comparison performance metrics
+    n_male = len(df[df['Sexo'] == 'Male'])
+    n_female = len(df[df['Sexo'] == 'Female'])
+
+    male_pos_pred = len(df[(df['Sexo'] == 'Male') & (df['output'] == 'Yes')])
+    female_pos_pred = len(df[(df['Sexo'] == 'Female') & (df['output'] == 'Yes')])
+    male_pos_true = len(df[(df['Sexo'] == 'Male') & (df['true_value'] == 'Yes')])
+    female_pos_true = len(df[(df['Sexo'] == 'Female') & (df['true_value'] == 'Yes')])
+
+    male_neg_pred = len(df[(df['Sexo'] == 'Male') & (df['output'] == 'No')])
+    female_neg_pred = len(df[(df['Sexo'] == 'Female') & (df['output'] == 'No')])
+    male_neg_true = len(df[(df['Sexo'] == 'Male') & (df['true_value'] == 'No')])
+    female_neg_true = len(df[(df['Sexo'] == 'Female') & (df['true_value'] == 'No')])
+
+    male_TP = len(df[(df['output'] == 'Yes') & (df['true_value'] == 'Yes') & (df['Sexo'] == 'Male')])
+    male_TN = len(df[(df['output'] == 'No') & (df['true_value'] == 'No') & (df['Sexo'] == 'Male')])
+    male_FP = len(df[(df['output'] == 'Yes') & (df['true_value'] == 'No') & (df['Sexo'] == 'Male')])
+    male_FN = len(df[(df['output'] == 'No') & (df['true_value'] == 'Yes') & (df['Sexo'] == 'Male')])
+    female_TP = len(df[(df['output'] == 'Yes') & (df['true_value'] == 'Yes') & (df['Sexo'] == 'Female')])
+    female_TN = len(df[(df['output'] == 'No') & (df['true_value'] == 'No') & (df['Sexo'] == 'Female')])
+    female_FP = len(df[(df['output'] == 'Yes') & (df['true_value'] == 'No') & (df['Sexo'] == 'Female')])
+    female_FN = len(df[(df['output'] == 'No') & (df['true_value'] == 'Yes') & (df['Sexo'] == 'Female')])
+    male_ACC = (male_TP + male_TN) / (male_TP + male_TN + male_FP + male_FN)
+    female_ACC = (female_TP + female_TN) / (female_TP + female_TN + female_FP + female_FN)
+
+    # DI (disparate impact)
+    DI = (male_pos_pred/n_male) / (female_pos_pred/n_female)
+    # AD (accuracy difference)
+    AD = male_ACC - female_ACC
+    # DCA (difference in conditional acceptance)
+    DCA = (male_pos_true/male_pos_pred) - (female_pos_true/female_pos_pred)
+    # DCR (difference in conditional rejection)
+    DCR = (male_neg_true/male_neg_pred) - (female_neg_true/female_neg_pred)
+    # TE (treatment equality)
+    TE = (female_FN/female_FP) - (male_FN/male_FP)
+
     # Export metrics in correct format
     ALL_ASSESSMENTS = []
     assessment_data = {'toolname': participant_name, 'OA': overall_accuracy, 'SP': statistical_parity, 
-                       'EO': equal_opportunity, 'PE': predictive_equality, 'FNR': false_negative_rate}
+                       'EO': equal_opportunity, 'PE': predictive_equality, 'FNR': false_negative_rate,
+                       'DI': DI, 'AD': AD, 'DCA': DCA, 'DCR': DCR, 'TE': TE}
     
     for key, value in assessment_data.items():
         if key != 'toolname':
