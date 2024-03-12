@@ -26,7 +26,6 @@ if (params.help) {
 	    Specifications for outputs:
                 --validation_result     The output directory where the results from validation step will be saved
                 --assessment_results    The output directory where the results from the computed metrics step will be saved
-                --consolidation_result	The output directory where the conoslidation file will be saved
 				--outdir                The output directory where the final results will be saved (graphs and such)
                 --statsdir              The output directory with nextflow statistics
                 --otherdir              The output directory where custom results will be saved (no directory inside)
@@ -51,7 +50,6 @@ if (params.help) {
          other participant results directory: ${params.aggreg_dir}
          validation results directory: ${params.validation_result}
          metrics results directory: ${params.assessment_results}
-         consolidation results directory: ${params.consolidation_result}
          overall results directory: ${params.outdir}
          statistics results about nextflow run: ${params.statsdir}
          directory with community-specific results: ${params.otherdir}
@@ -71,7 +69,7 @@ gold_standard = file(params.goldstandard_dir)
 // Output
 validation_dir = file(params.validation_result, type: 'dir')
 assessment_dir = file(params.assessment_results, type: 'dir')
-consolidation_dir = file(params.consolidation_result, type: 'dir')
+//consolidation_dir = file(params.consolidation_result, type: 'dir')
 results_dir = file(params.outdir, type: 'dir')
 stats_dir = file(params.statsdir, type: 'dir')
 //other_dir = file(params.otherdir, type: 'dir')
@@ -162,7 +160,7 @@ process consolidation {
 	val validations
 	val challenge_id
 	val offline
-	path consolidation_dir
+	//path consolidation_dir
 	
 	output:
 	path results_dir
@@ -182,7 +180,8 @@ workflow {
 	validations = validation.out.vf.collect()
 	compute_metrics(validation.out.validation_status, input_file, gold_standard, tool_name, community_id, challenge_id, assessment_filename)
 	assessments = compute_metrics.out.af.collect()
-    consolidation(benchmark_data, assessments, validations, challenge_id, 1, consolidation_dir)
+    //consolidation(benchmark_data, assessments, validations, challenge_id, 1, consolidation_dir)
+	consolidation(benchmark_data, assessments, validations, challenge_id, 1)
 }
 
 workflow.onComplete { 
