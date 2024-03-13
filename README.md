@@ -1,2 +1,2 @@
-# BAIHA
-This repository contains the code for the BAIHA community on OpenEBench.
+# Sex Bias in Atrial Fibrillation Detection
+This repository contains the code for the BAIHA community proof-of-concept event - assessing sex biases in datasets and AI tools for detecting atrial fibrillation from electrocardiogram signals.
