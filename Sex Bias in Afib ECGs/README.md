@@ -90,8 +90,11 @@ Below are the requirements that your submitted dataset must follow in order to w
 
 #### For definition purposes:
 TP - True positives, model predicted positive and true value is positive (count)
+
 TN - True negatives, model predicted negative and true value is negative (count)
+
 FP - False positives, model predicted positive but true value is negative (count)
+
 FN - False negatives, model predicted negative but true value is positive (count)
 
 
