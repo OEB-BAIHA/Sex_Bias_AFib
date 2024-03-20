@@ -9,8 +9,8 @@
                 "challenge_participants": [],
                 "visualization": {
                     "type": "2D-plot",
-                    "x_axis": "CI",
-                    "y_axis": "PLI",
+                    "x_axis": "PLI",
+                    "y_axis": "NLI",
                     "optimization": "top-left"
                 }
             }
@@ -28,6 +28,38 @@
                 "visualization": {
                     "type": "bar-plot",
                     "metric": "CI"
+                }
+            }
+        },
+        "type": "aggregation"
+    },
+    {
+        "_id": "ID",
+        "challenge_ids": [
+            
+        ],
+        "datalink": {
+            "inline_data": {
+                "challenge_participants": [],
+                "visualization": {
+                    "type": "bar-plot",
+                    "metric": "FPLP"
+                }
+            }
+        },
+        "type": "aggregation"
+    },
+    {
+        "_id": "ID",
+        "challenge_ids": [
+            
+        ],
+        "datalink": {
+            "inline_data": {
+                "challenge_participants": [],
+                "visualization": {
+                    "type": "bar-plot",
+                    "metric": "FNLP"
                 }
             }
         },
@@ -75,7 +107,7 @@
                 "challenge_participants": [],
                 "visualization": {
                     "type": "bar-plot",
-                    "metric": "MCD"
+                    "metric": "FCDD"
                 }
             }
         },
@@ -91,7 +123,7 @@
                 "challenge_participants": [],
                 "visualization": {
                     "type": "bar-plot",
-                    "metric": "FCD"
+                    "metric": "MCDD"
                 }
             }
         },
