@@ -25,6 +25,7 @@ if (params.help) {
         Specifications for outputs:
                 --validation_result     The output directory where the results from validation step will be saved
                 --assessment_results    The output directory where the results from the computed metrics step will be saved
+                --consolidation_result .json output from consolidation step
                 --outdir                The output directory where the final results will be saved (graphs and such)
                 --statsdir              The output directory with nextflow statistics
                 --otherdir              The output directory where custom results will be saved (no directory inside)
@@ -68,40 +69,36 @@ gold_standard = file(params.goldstandard_dir)
 // Output
 validation_dir = file(params.validation_result, type: 'dir')
 assessment_dir = file(params.assessment_results, type: 'dir')                   // filepath including filename of where metrics (assessment) output should be saved 
-results_dir = file(params.outdir, type: 'dir')
+output_dir = file(params.outdir, type: 'dir')
 stats_dir = file(params.statsdir, type: 'dir')
+results_dir = file(params.results, type: 'dir')
+consolidation_file = file(params.consolidation_result)
 //other_dir = file(params.otherdir, type: 'dir')
 //data_model_export_dir = file(params.data_model_export_dir, type: 'dir')       // filepath including filename of where consolidation output should be saved 
-
-// Output filenames
-validation_filename = "${params.participant_id}_validation.json"
-assessment_filename = "${params.participant_id}_assessment.json"
-consolidation_filename = "${params.participant_id}_consolidation.json"
 
 
 process dataset_validation {
 
     tag "Validating training dataset format"
 
-    publishDir validation_dir,
+    publishDir output_dir,
     mode: 'copy',
     overwrite: false,
-    saveAs: { filename -> validation_filename }
+    saveAs: { filename -> "validated_${input_file.baseName}.json" }
 
     input:
     file input_file
     val tool_name
     val community_id
     val challenge_id
-    val validation_filename
 
     output:
     val task.exitStatus, emit: validation_status
-    path validation_filename, emit: vf
+    path validation_file, emit: validation_file
 
     script:
     """
-    python3 /app/training_dataset_validation.py -i $input_file -c $challenge_id -p $tool_name -com $community_id -o $validation_filename
+    python3 /app/training_dataset_validation.py -i $input_file -c $challenge_id -p $tool_name -com $community_id -o validation_file
     """
 }
 
@@ -109,10 +106,11 @@ process dataset_compute_metrics {
 
     tag "Computing metrics for training dataset"
 
-    publishDir assessment_dir,
-    mode: 'copy',
-    overwrite: false,
-    saveAs: { filename -> assessment_filename }
+    publishDir output_dir,
+	mode: 'copy',
+	overwrite: false,
+	pattern: "${input_file.baseName}.json",
+	saveAs: { filename -> "assessments_${input_file.baseName}.json" }
 
     input:
     val validation_status
@@ -120,10 +118,9 @@ process dataset_compute_metrics {
     val tool_name
     val community_id
     val challenge_id
-    val assessment_filename
 
     output:
-    path assessment_filename, emit: af
+    path "${input_file.baseName}.json", emit: ass_json
     
     when:
     validation_status == 0
@@ -131,7 +128,7 @@ process dataset_compute_metrics {
     script:
     """
     echo $input_file
-    python /app/training_dataset_test.py -i $input_file -p $tool_name -com $community_id -c $challenge_id -o $assessment_filename
+    python /app/training_dataset_test.py -i $input_file -p $tool_name -com $community_id -c $challenge_id -o "${input_file.baseName}.json"
     """
 }
 
@@ -140,24 +137,33 @@ process dataset_consolidation {
 
     tag "Performing benchmark assessment and building plots"
 
-    //TODO: Make sure exports of results are correct
-    publishDir results_dir
+    publishDir "${results_dir.parent}", 
+	pattern: "output_dir", 
+	mode: 'copy',
+	overwrite: false,
+	saveAs: { filename -> results_dir.name } 
+
+	publishDir output_dir,
+	pattern: "consolidated_result.json",
+	mode: 'copy',
+	overwrite: false,
+	saveAs: { filename -> consolidation_file.name }
 
     input:
     path benchmark_data
-    path assessments
-    val validations
+    path ass_json
+    val validation_file
     val challenge_id
     val offline
     
     output:
-    path results_dir
+    path "output_dir"
     path "consolidated_result.json"
 
     script:
     """
-    python /app/aggregation.py -b $benchmark_data -a $assessments -o results_dir --offline $offline
-    python /app/merge_data_model_files.py -v $validations -m $assessments -c $challenge_id -a results_dir -o consolidated_result.json
+    python /app/aggregation.py -b $benchmark_data -a $ass_json -o output_dir --offline $offline
+    python /app/merge_data_model_files.py -v $validation_file -m $ass_json -c $challenge_id -a output_dir -o consolidated_result.json
 
     """
 }
@@ -166,25 +172,24 @@ process output_validation {
 
     tag "Validating training dataset format"
 
-    publishDir validation_dir,
+    publishDir output_dir,
     mode: 'copy',
     overwrite: false,
-    saveAs: { filename -> validation_filename }
+    saveAs: { filename -> "validated_${input_file.baseName}.json" }
 
     input:
     file input_file
     val tool_name
     val community_id
     val challenge_id
-    val validation_filename
 
     output:
     val task.exitStatus, emit: validation_status
-    path validation_filename, emit: vf
+    path validation_file, emit: validation_file
 
     script:
     """
-    python3 /app/model_output_validation.py -i $input_file -c $challenge_id -p $tool_name -com $community_id -o $validation_filename
+    python3 /app/model_output_validation.py -i $input_file -c $challenge_id -p $tool_name -com $community_id -o validation_file
     """
 }
 
@@ -192,10 +197,11 @@ process output_compute_metrics {
 
     tag "Computing metrics for training dataset"
 
-    publishDir assessment_dir,
-    mode: 'copy',
-    overwrite: false,
-    saveAs: { filename -> assessment_filename }
+    publishDir output_dir,
+	mode: 'copy',
+	overwrite: false,
+	pattern: "${input_file.baseName}.json",
+	saveAs: { filename -> "assessments_${input_file.baseName}.json" }
 
     input:
     val validation_status
@@ -204,10 +210,9 @@ process output_compute_metrics {
     val tool_name
     val community_id
     val challenge_id
-    val assessment_filename
 
     output:
-    path assessment_filename, emit: af
+    path "${input_file.baseName}.json", emit: ass_json
     
     when:
     validation_status == 0
@@ -215,7 +220,7 @@ process output_compute_metrics {
     script:
     """
     echo $input_file
-    python /app/model_output_test.py -i $input_file -p $tool_name -com $community_id -c $challenge_id -o $assessment_filename -m $gold_standard
+    python /app/model_output_test.py -i $input_file -p $tool_name -com $community_id -c $challenge_id -o "${input_file.baseName}.json" -m $gold_standard
     """
 }
 
@@ -224,24 +229,33 @@ process output_consolidation {
 
     tag "Performing benchmark assessment and building plots"
 
-    //TODO: Make sure exports of results are correct
-    publishDir results_dir
+    publishDir "${results_dir.parent}", 
+	pattern: "output_dir", 
+	mode: 'copy',
+	overwrite: false,
+	saveAs: { filename -> results_dir.name } 
+
+	publishDir output_dir,
+	pattern: "consolidated_result.json",
+	mode: 'copy',
+	overwrite: false,
+	saveAs: { filename -> consolidation_file.name }
 
     input:
     path benchmark_data
-    path assessments
-    val validations
+    path ass_json
+    val validation_file
     val challenge_id
     val offline
     
     output:
-    path results_dir
+    path "output_dir"
     path "consolidated_result.json"
 
     script:
     """
-    python /app/aggregation.py -b $benchmark_data -a $assessments -o results_dir --offline $offline
-    python /app/merge_data_model_files.py -v $validations -m $assessments -c $challenge_id -a results_dir -o consolidated_result.json
+    python /app/aggregation.py -b $benchmark_data -a $ass_json -o output_dir --offline $offline
+    python /app/merge_data_model_files.py -v $validation_file -m $ass_json -c $challenge_id -a output_dir -o consolidated_result.json
 
     """
 }
@@ -249,18 +263,18 @@ process output_consolidation {
 workflow {
 
     if ( challenge_id == 'training_dataset' ) {
-        dataset_validation(input_file, tool_name, community_id, challenge_id, validation_filename)
-        validations = dataset_validation.out.vf.collect()
-        dataset_compute_metrics(dataset_validation.out.validation_status, input_file, tool_name, community_id, challenge_id, assessment_filename)
-        assessments = dataset_compute_metrics.out.af.collect()
+        dataset_validation(input_file, tool_name, community_id, challenge_id)
+        validations = dataset_validation.out.validation_file.collect()
+        dataset_compute_metrics(dataset_validation.out.validation_status, input_file, tool_name, community_id, challenge_id)
+        assessments = dataset_compute_metrics.out.ass_json.collect()
         dataset_consolidation(benchmark_data, assessments, validations, challenge_id, 1)
     }
 
     else if ( challenge_id == 'model_output' ) {
-        output_validation(input_file, tool_name, community_id, challenge_id, validation_filename)
-        validations = output_validation.out.vf.collect()
-        output_compute_metrics(output_validation.out.validation_status, input_file, gold_standard, tool_name, community_id, challenge_id, assessment_filename)
-        assessments = output_compute_metrics.out.af.collect()
+        output_validation(input_file, tool_name, community_id, challenge_id)
+        validations = output_validation.out.validation_file.collect()
+        output_compute_metrics(output_validation.out.validation_status, input_file, gold_standard, tool_name, community_id, challenge_id)
+        assessments = output_compute_metrics.out.ass_json.collect()
         output_consolidation(benchmark_data, assessments, validations, challenge_id, 1)
     }
 
