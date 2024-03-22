@@ -15,21 +15,25 @@ if (params.help) {
 		Run locally:
 		nextflow run main.nf -profile docker --input ../input_data/Nuubo_output.csv --participant_id Nuubo --challenge_ids model-output --consolidation_result ./consolidation_output --validation_result ./validation_output --assessment_result ./metrics_output --aggreg_dir ./benchmark_data --goldstandard_dir ../gold_standard/key.csv
 
+
 	    Specifications for inputs:
-				--input					Training dataset to be assessed
-				--participant_id        Name of the training dataset to be assessed
+		(provided by OpenEBench)
+		--input			Training dataset to be assessed
+		--participant_id        Name of the training dataset to be assessed
                 --community_id          Name or OEB permanent ID for the benchmarking community
                 --challenge_ids         Not sure we need this, hardcode for now as 'training_dataset'
                 --aggreg_dir            Directory where performance metrics for other tools are stored (for consolidation with new results)
-				--goldstandard_dir		Directory that contains the golden dataset with ground truths 
+		--goldstandard_dir	Directory that contains the golden dataset with ground truths
+		--public_ref_dir	Directory that contains one or more reference files used to validate input data. Ej: reference public databases
 
 	    Specifications for outputs:
-                --validation_result     The output directory where the results from validation step will be saved
+		(provided by OpenEBench)
                 --assessment_results    The output directory where the results from the computed metrics step will be saved
-				--outdir                The output directory where the final results will be saved (graphs and such)
+		--outdir                The output directory where the final results will be saved (graphs and such)
                 --statsdir              The output directory with nextflow statistics
                 --otherdir              The output directory where custom results will be saved (no directory inside)
-				--data_model_export_dir	All datasets generated during the workflow are merged into one JSON to be validated and pushed to Level 1
+		--data_model_export_dir	All datasets generated during the workflow are merged into one JSON to be validated and pushed to Level 1
+                --validation_result     File path where the validated (corrected/updated) participant dataset is written.
 
 	    Flags:
                 --help                  Display this message
