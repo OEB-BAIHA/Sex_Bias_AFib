@@ -10,16 +10,14 @@ if (params.help) {
 	    ==============================================
 
         Run locally:
-        nextflow run main.nf -profile docker --input ../input_data/Nuubo_dataset.csv --participant_id Nuubo --challenge_ids training-datasets --consolidation_result ./consolidation_output --validation_result ./validation_output --assessment_result ./metrics_output --aggreg_dir ./benchmark_data
-        or 
-        nextflow run main.nf -profile docker --input ../input_data/Nuubo_output.csv --participant_id Nuubo --challenge_ids model-output --consolidation_result ./consolidation_output --validation_result ./validation_output --assessment_result ./metrics_output --aggreg_dir ./benchmark_data --goldstandard_dir ../gold_standard/key.csv
+        nextflow run main.nf -profile docker -params-file ... 
 
         Specifications for inputs:
                 --input					Training dataset to be assessed
                 --participant_id        Name of the training dataset to be assessed
                 --community_id          Name or OEB permanent ID for the benchmarking community
-                --challenge_ids         Not sure we need this, hardcode for now as 'training_dataset'
-                --aggreg_dir            Directory where performance metrics for other tools are stored (for consolidation with new results)
+                --challenges_ids        Not sure we need this, hardcode for now as 'training_dataset'
+                --assess_dir            Directory where performance metrics for other tools are stored
                 --goldstandard_dir		Directory that contains the golden dataset with ground truths
  
         Specifications for outputs:
@@ -43,48 +41,48 @@ if (params.help) {
          BAIHA BENCHMARKING PIPELINE
          ============================
          benchmarking community: ${params.community_id}
-         challenge: ${params.challenge_ids}
+         challenge: ${params.challenges_ids}
          input directory: ${params.input}
          gold standard directory: ${params.goldstandard_dir}
          participant id: ${params.participant_id}
-         other participant results directory: ${params.aggreg_dir}
+         other participant results directory: ${params.assess_dir}
          validation results directory: ${params.validation_result}
          metrics results directory: ${params.assessment_results}
          overall results directory: ${params.outdir}
          statistics results about nextflow run: ${params.statsdir}
          directory with community-specific results: ${params.otherdir}
-         output for level 1 directory: ${params.data_model_export_dir}
+         output path for the consolidated results: ${params.data_model_export_dir}
          """
 
 }
 
-// Input
+// Input (setting these to files and directories that already exist)
 input_file = file(params.input)
 tool_name = params.participant_id.replaceAll("\\s","_")
-challenge_id = params.challenge_ids // In OEB, challenges_ids is an array, but in our case, it will be one value (either training_dataset or model_output)
+challenge_id = params.challenges_ids // In OEB, challenges_ids is an array, but in our case, it will be one value (either training_dataset or model_output)
 community_id = params.community_id
-benchmark_data = Channel.fromPath(params.aggreg_dir, type: 'dir' )
+benchmark_data = Channel.fromPath(params.assess_dir, type: 'dir' )
+//gold_standard = file(params.goldstandard_dir, type: 'dir')
 gold_standard = file(params.goldstandard_dir)
 
-// Output
-validation_dir = file(params.validation_result, type: 'dir')
-assessment_dir = file(params.assessment_results, type: 'dir')                   // filepath including filename of where metrics (assessment) output should be saved 
+// Output (setting these to names of files and directories that you want to be created)
+validation_filename = file(params.validation_result)
+assessment_dir = file(params.assessment_results, type: 'dir')     // filepath including filename of where metrics (assessment) output should be saved 
 output_dir = file(params.outdir, type: 'dir')
 stats_dir = file(params.statsdir, type: 'dir')
-results_dir = file(params.results, type: 'dir')
-consolidation_file = file(params.consolidation_result)
 //other_dir = file(params.otherdir, type: 'dir')
-//data_model_export_dir = file(params.data_model_export_dir, type: 'dir')       // filepath including filename of where consolidation output should be saved 
-
+consolidation_filename = file(params.data_model_export_dir)       // filepath including filename of where consolidation output should be saved 
+assessment_filename = assessment_dir / "${params.participant_id}_assessment.json"
+offline = params.offline
 
 process dataset_validation {
 
     tag "Validating training dataset format"
 
-    publishDir output_dir,
+    publishDir validation_filename.parent,
     mode: 'copy',
     overwrite: false,
-    saveAs: { filename -> "validated_${input_file.baseName}.json" }
+    saveAs: { filename -> validation_filename.name }
 
     input:
     file input_file
@@ -106,11 +104,10 @@ process dataset_compute_metrics {
 
     tag "Computing metrics for training dataset"
 
-    publishDir output_dir,
+    publishDir assessment_dir.parent,
 	mode: 'copy',
 	overwrite: false,
-	pattern: "${input_file.baseName}.json",
-	saveAs: { filename -> "assessments_${input_file.baseName}.json" }
+	saveAs: { filename -> assessment_filename.name }
 
     input:
     val validation_status
@@ -132,22 +129,27 @@ process dataset_compute_metrics {
     """
 }
 
-//assessments needs to be a path but validation_file is a val, not sure why, maybe something to do with the aggregation python script?
 process dataset_consolidation {
 
     tag "Performing benchmark assessment and building plots"
 
-    publishDir "${results_dir.parent}", 
-	pattern: "output_dir", 
-	mode: 'copy',
-	overwrite: false,
-	saveAs: { filename -> results_dir.name } 
+    // publishDir "${results_dir.parent}", 
+	// pattern: "output_dir", 
+	// mode: 'copy',
+	// overwrite: false,
+	// saveAs: { filename -> results_dir.name } 
 
-	publishDir output_dir,
-	pattern: "consolidated_result.json",
+	// publishDir output_dir,
+	// pattern: "consolidated_result.json",
+	// mode: 'copy',
+	// overwrite: false,
+	// saveAs: { filename -> consolidation_file.name }
+
+    publishDir consolidation_filename.parent,
+    pattern: "consolidated_result.json",
 	mode: 'copy',
 	overwrite: false,
-	saveAs: { filename -> consolidation_file.name }
+	saveAs: { filename -> consolidation_filename.name }
 
     input:
     path benchmark_data
@@ -172,10 +174,10 @@ process output_validation {
 
     tag "Validating training dataset format"
 
-    publishDir output_dir,
+    publishDir validation_filename.parent,
     mode: 'copy',
     overwrite: false,
-    saveAs: { filename -> "validated_${input_file.baseName}.json" }
+    saveAs: { filename -> validation_filename.name }
 
     input:
     file input_file
@@ -197,11 +199,10 @@ process output_compute_metrics {
 
     tag "Computing metrics for training dataset"
 
-    publishDir output_dir,
+    publishDir assessment_dir.parent,
 	mode: 'copy',
 	overwrite: false,
-	pattern: "${input_file.baseName}.json",
-	saveAs: { filename -> "assessments_${input_file.baseName}.json" }
+	saveAs: { filename -> assessment_filename.name }
 
     input:
     val validation_status
@@ -224,22 +225,27 @@ process output_compute_metrics {
     """
 }
 
-//assessments needs to be a path but validation_file is a val, not sure why, maybe something to do with the aggregation python script?
 process output_consolidation {
 
     tag "Performing benchmark assessment and building plots"
 
-    publishDir "${results_dir.parent}", 
-	pattern: "output_dir", 
-	mode: 'copy',
-	overwrite: false,
-	saveAs: { filename -> results_dir.name } 
+    // publishDir "${results_dir.parent}", 
+	// pattern: "output_dir", 
+	// mode: 'copy',
+	// overwrite: false,
+	// saveAs: { filename -> results_dir.name } 
 
-	publishDir output_dir,
-	pattern: "consolidated_result.json",
+	// publishDir output_dir,
+	// pattern: "consolidated_result.json",
+	// mode: 'copy',
+	// overwrite: false,
+	// saveAs: { filename -> consolidation_file.name }
+
+    publishDir consolidation_filename.parent,
+    pattern: "consolidated_result.json",
 	mode: 'copy',
 	overwrite: false,
-	saveAs: { filename -> consolidation_file.name }
+	saveAs: { filename -> consolidation_filename.name }
 
     input:
     path benchmark_data
@@ -275,7 +281,7 @@ workflow {
         validations = output_validation.out.validation_file.collect()
         output_compute_metrics(output_validation.out.validation_status, input_file, gold_standard, tool_name, community_id, challenge_id)
         assessments = output_compute_metrics.out.ass_json.collect()
-        output_consolidation(benchmark_data, assessments, validations, challenge_id, 1)
+        output_consolidation(benchmark_data, assessments, validations, challenge_id, offline)
     }
 
     else {
