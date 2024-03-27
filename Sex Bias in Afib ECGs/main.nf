@@ -10,7 +10,7 @@ if (params.help) {
 	    ==============================================
 
         Run locally:
-        nextflow run main.nf -profile docker -params-file ... 
+        nextflow run main.nf -profile docker 
 
         Specifications for inputs:
                 --input					Training dataset to be assessed
@@ -21,9 +21,9 @@ if (params.help) {
                 --goldstandard_dir		Directory that contains the golden dataset with ground truths
  
         Specifications for outputs:
-                --validation_result     The output directory where the results from validation step will be saved
-                --assessment_results    The output directory where the results from the computed metrics step will be saved
-                --consolidation_result .json output from consolidation step
+                --validation_result     The output path where the results from validation step will be saved
+                --assessment_results    The output path where the results from the computed metrics step will be saved
+                --consolidation_result  The output path where the output from consolidation step will be saved
                 --outdir                The output directory where the final results will be saved (graphs and such)
                 --statsdir              The output directory with nextflow statistics
                 --otherdir              The output directory where custom results will be saved (no directory inside)
@@ -47,7 +47,7 @@ if (params.help) {
          gold standard directory: ${params.goldstandard_dir}
          participant id: ${params.participant_id}
          other participant results directory: ${params.assess_dir}
-         validation results directory: ${params.validation_result}
+         validation results path: ${params.validation_result}
          metrics results path: ${params.assessment_results}
          output directory: ${params.outdir}
          statistics results about nextflow run: ${params.statsdir}
@@ -69,7 +69,7 @@ gold_standard_dir = Channel.fromPath(params.goldstandard_dir, type: 'dir' )
 // Output (setting these to names of files and directories that you want to be created)
 output_dir = file(params.outdir, type: 'dir')
 stats_dir = file(params.statsdir, type: 'dir')
-validation_filename = file(params.validation_result) 
+validation_filename = file(params.validation_result)            // filepath including filename of where validation output should be saved
 assessment_filename = file(params.assessment_results)           // filepath including filename of where metrics (assessment) output should be saved
 consolidation_filename = file(params.data_model_export_dir)     // filepath including filename of where consolidation output should be saved
 other_dir = file(params.otherdir, type: 'dir')
