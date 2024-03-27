@@ -264,7 +264,7 @@ workflow {
         validations = dataset_validation.out.validation_file.collect()
         dataset_compute_metrics(dataset_validation.out.validation_status, input_file, participant_id, community_id, challenge_id)
         assessments = dataset_compute_metrics.out.ass_json.collect()
-        dataset_consolidation(other_participant_data, assessments, validations, challenge_id, 1)
+        dataset_consolidation(other_participant_data, assessments, validations, challenge_id, offline)
     }
 
     else if ( challenge_id == 'model_output' ) {
