@@ -9,8 +9,8 @@
                 "challenge_participants": [],
                 "visualization": {
                     "type": "2D-plot",
-                    "x_axis": "SP",
-                    "y_axis": "EO",
+                    "x_axis": "EO",
+                    "y_axis": "PE",
                     "optimization": "top-left"
                 }
             }
