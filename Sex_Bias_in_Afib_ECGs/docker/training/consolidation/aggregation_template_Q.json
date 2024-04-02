@@ -1,0 +1,116 @@
+[
+  {
+    "_id": "ID",
+    "challenge_ids": [],
+    "datalink": {
+      "inline_data": {
+        "challenge_participants": [],
+        "visualization": {
+          "type": "2D-plot",
+          "x_axis": "Class Imbalance",
+          "y_axis": "Positive Label Imbalance",
+          "optimization": "top-left"
+        }
+      }
+    },
+    "type": "aggregation"
+  },
+  {
+    "_id": "ID",
+    "challenge_ids": [],
+    "datalink": {
+      "inline_data": {
+        "challenge_participants": [],
+        "visualization": {
+          "type": "bar-plot",
+          "metric": "Class Imbalance"
+        }
+      }
+    },
+    "type": "aggregation"
+  },
+  {
+    "_id": "ID",
+    "challenge_ids": [],
+    "datalink": {
+      "inline_data": {
+        "challenge_participants": [],
+        "visualization": {
+          "type": "bar-plot",
+          "metric": "Positive Label Imbalance"
+        }
+      }
+    },
+    "type": "aggregation"
+  },
+  {
+    "_id": "ID",
+    "challenge_ids": [],
+    "datalink": {
+      "inline_data": {
+        "challenge_participants": [],
+        "visualization": {
+          "type": "bar-plot",
+          "metric": "Negative Label Imbalance"
+        }
+      }
+    },
+    "type": "aggregation"
+  },
+  {
+    "_id": "ID",
+    "challenge_ids": [],
+    "datalink": {
+      "inline_data": {
+        "challenge_participants": [],
+        "visualization": {
+          "type": "bar-plot",
+          "metric": "Male Conditional Demography"
+        }
+      }
+    },
+    "type": "aggregation"
+  },
+  {
+    "_id": "ID",
+    "challenge_ids": [],
+    "datalink": {
+      "inline_data": {
+        "challenge_participants": [],
+        "visualization": {
+          "type": "bar-plot",
+          "metric": "Female Conditional Demography"
+        }
+      }
+    },
+    "type": "aggregation"
+  },
+  {
+    "_id": "ID",
+    "challenge_ids": [],
+    "datalink": {
+      "inline_data": {
+        "challenge_participants": [],
+        "visualization": {
+          "type": "bar-plot",
+          "metric": "Female Positive Label Percentage"
+        }
+      }
+    },
+    "type": "aggregation"
+  },
+  {
+    "_id": "ID",
+    "challenge_ids": [],
+    "datalink": {
+      "inline_data": {
+        "challenge_participants": [],
+        "visualization": {
+          "type": "bar-plot",
+          "metric": "Female Negative Label Percentage"
+        }
+      }
+    },
+    "type": "aggregation"
+  }
+]

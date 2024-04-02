@@ -1,0 +1,16 @@
+training_dataset:
+  id_column_name: ID
+  sex_column_name: Sexo
+  diagnosis_column_name: AF
+  output_filename:
+
+model_output:
+  id_column_name: patient_id
+  diagnosis_column_name: diagnosis
+  output_filename:
+
+golden_dataset:
+  input_filename:
+  id_column_name:
+  sex_column_name:
+  diagnosis_column_name:
